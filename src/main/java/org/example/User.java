@@ -12,14 +12,14 @@ public class User {
     private String password;
     private Role role;
     private List<Duty> duties;
-    private int limitDuties;
+    private int limitduty;
 
     public User(String fullname, String password, Role role) {
         this.fullname = fullname;
         this.password = password;
         this.role = role;
         this.duties = new ArrayList<>();
-        this.limitDuties = -1;
+        this.limitduty = -1;
     }
 
     public boolean checkPassword(String inputPassword) {
@@ -34,8 +34,8 @@ public class User {
         return duties.size();
     }
 
-    public boolean receivDuty() {
-        return limitDuties == -1 || getDutyCount() < limitDuties;
+    public boolean getDuty() {
+        return limitduty == -1 || getDutyCount() < limitduty;
     }
 
     @Override

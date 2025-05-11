@@ -6,8 +6,8 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Register_Users registerUsers = new Register_Users();
-
         User user = null;
+
 
 
         while (user == null) {
@@ -31,15 +31,25 @@ public class Main {
                 System.out.println("2.Переглядати активні наряди");
                 System.out.println("3.Розподілити наряди");
                 System.out.println("4.Змінити наряд вручну");
+                System.out.println("5. Показати статистику за місяць");
                 System.out.println("0.Вихід");
 
                 choice = scanner.nextInt();
                 scanner.nextLine();
+
                 switch (choice) {
                     case 1 -> registerUsers.listUsers();
                     case 2 -> registerUsers.listActiveDyte();
-                    case 3 -> registerUsers.autoDistribution();
-                    case 4 -> changeDutyManually(scanner, registerUsers);
+                    case 3 -> registerUsers.manualDistribution(scanner);
+                    case 4 -> changeduty(scanner, registerUsers);
+                    case 5 -> {
+                        System.out.println("Введіть рік: ");
+                        int year = scanner.nextInt();
+                        System.out.println("Введіть місяць: ");
+                        int month = scanner.nextInt();
+                        scanner.nextLine();
+                        registerUsers.printQuantilyperMonth(year, month);
+                    }
                 }
             } while (choice != 0);
         } else {
@@ -64,7 +74,7 @@ public class Main {
     }
 
 
-    private static void changeDutyManually(Scanner scanner, Register_Users registerUsers) {
+    private static void changeduty(Scanner scanner, Register_Users registerUsers) {
         System.out.println("Виберіть користувача для зміни наряду:");
         registerUsers.listUsers();
         System.out.println("Введіть ім'я користувача: ");
@@ -80,19 +90,19 @@ public class Main {
             System.out.println("1. Призначити наряд");
             System.out.println("2. Забрати наряд");
 
-            int actionChoice = scanner.nextInt();
+            int actionselection = scanner.nextInt();
             scanner.nextLine();
-            if (actionChoice == 1) {
+            if (actionselection == 1) {
 
                 System.out.println("Виберіть наряд для призначення:");
                 System.out.println("1. Наряд на столову");
                 System.out.println("2. Наряд на курс");
 
-                int dutyChoice = scanner.nextInt();
+                int dutyselection = scanner.nextInt();
                 scanner.nextLine();
 
                 Duty duty = null;
-                switch (dutyChoice) {
+                switch (dutyselection) {
                     case 1 -> duty = new Duty("Наряд на столову", 1);
                     case 2 -> duty = new Duty("Наряд на курс", 1);
                     default -> System.out.println("Невірний вибір");
@@ -100,32 +110,33 @@ public class Main {
 
                 if (duty != null) {
                     user.addDuty(duty);
-                    System.out.println("Наряд успішно призначено користувачу " + user.getFullname());
+                    System.out.println("Наряд успішно призначено " + user.getFullname());
                 }
-            } else if (actionChoice == 2) {
-                // Забираємо наряд
+            } else if (actionselection == 2) {
+
                 System.out.println("Виберіть наряд для видалення:");
                 for (int i = 0; i < user.getDuties().size(); i++) {
                     Duty d = user.getDuties().get(i);
                     System.out.println((i + 1) + ". " + d.getDescription() + " на " + d.getDate());
                 }
 
-                int dutyIndex = scanner.nextInt() - 1;
+                int indexduty = scanner.nextInt() - 1;
                 scanner.nextLine();
 
-                if (dutyIndex >= 0 && dutyIndex < user.getDuties().size()) {
-                    Duty dutyToRemove = user.getDuties().get(dutyIndex);
-                    user.getDuties().remove(dutyToRemove);  // Видаляємо наряд
-                    System.out.println("Наряд " + dutyToRemove.getDescription() + " успішно забрано у користувача " + user.getFullname());
+                if (indexduty >= 0 && indexduty < user.getDuties().size()) {
+                    Duty dutyremove = user.getDuties().get(indexduty);
+                    user.getDuties().remove(dutyremove);
+                    System.out.println("Наряд " + dutyremove.getDescription() + " забрано у " + user.getFullname());
                 } else {
                     System.out.println("Невірний вибір наряду.");
                 }
             } else {
-                System.out.println("Невірний вибір дії.");
+                System.out.println("Невірний вибір.");
             }
         } else {
-            System.out.println("Користувач не знайдений.");
+            System.out.println("Користувача не знайдений.");
         }
     }
+
 }
 

@@ -8,12 +8,13 @@ public class Register_Users implements UserManagerInterface, ControlDuty {
     private List<User> users = new ArrayList<>();
     private List<Duty> availableDuties = new ArrayList<>();
 
+
     Register_Users() {
         users.add(new User("Admin", "12345", Role.ADMIN));
 
         String[][] cadets = {
                 {"Іван Іванов", "ivan2023", "2"},
-                {"Олег Петришин", "oleg2025", "1"},
+                {"Олег Петришин", "oleg2025", "0"},
                 {"Петро Сидоренко", "petro2022", "-1"},
                 {"Василь Потопа", "vasyl2024", "4"},
                 {"Андрій Карпо", "carpo2022", "-1"},
@@ -22,7 +23,7 @@ public class Register_Users implements UserManagerInterface, ControlDuty {
 
         for (String[] data : cadets) {
             User cadet = new User(data[0], data[1], Role.USER);
-            cadet.setLimitDuties(Integer.parseInt(data[2]));
+            cadet.setLimitduty(Integer.parseInt(data[2]));
             users.add(cadet);
         }
 
@@ -90,25 +91,20 @@ public class Register_Users implements UserManagerInterface, ControlDuty {
     }
 
     @Override
-    public void autoDistribution() {
-        LocalDate today = LocalDate.now();
-        LocalDate startDate = today.withDayOfMonth(1);
-        LocalDate endDate = startDate.plusMonths(1).minusDays(1);
+    public void autoDistribution(int year, int month, Map<String, Integer> dutiesMonth) {
+        LocalDate startDate= LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
         List<User> userOnly = users.stream()
                 .filter(user -> user.getRole() == Role.USER)
                 .collect(Collectors.toList());
 
-        for (Duty duty : availableDuties) {
-            int totalDuties = duty.getQuantity();
+        for (Map.Entry<String, Integer> entry : dutiesMonth.entrySet()) {
+            String description = entry.getKey();
+            int totalDuties = entry.getValue();
             int assigned = 0;
 
-            int maxPerDay;
-            if (duty.getDescription().toLowerCase().contains("столов")) {
-                maxPerDay = 2;
-            } else {
-                maxPerDay = 1;
-            }
+            int maxPerDay = description.toLowerCase().contains("столова") ? 2 : 1;
 
             for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
                 if (assigned >= totalDuties) break;
@@ -119,10 +115,10 @@ public class Register_Users implements UserManagerInterface, ControlDuty {
                 for (User user : userOnly) {
                     if (dailyAssigned >= maxPerDay || assigned >= totalDuties) break;
 
-                    if (user.receivDuty()) {
+                    if (user.getDuty()) {
                         LocalDate last = user.lastDuty();
                         if (last == null || last.plusDays(3).isBefore(date)) {
-                            user.addDuty(new Duty(duty.getDescription(), 1, date));
+                            user.addDuty(new Duty(description, 1, date));
                             dailyAssigned++;
                             assigned++;
                         }
@@ -131,10 +127,48 @@ public class Register_Users implements UserManagerInterface, ControlDuty {
                 }
             }
 
-            duty.setQuantity(duty.getQuantity() - assigned);
         }
     }
 
 
+    public void printQuantilyperMonth(int year, int month) {
+        System.out.println("\n--- Статистика за місяць ---" + month + "/" + year + " ---");
+        for (User user : users) {
+            if (user.getRole() == Role.USER) {
+                Map<String, Long> dutyCount = user.getDuties().stream()
+                        .filter(duty -> duty.getDate() != null && duty.getDate().getYear() == year && duty.getDate().getMonthValue() == month)
+                        .collect(Collectors.groupingBy(Duty::getDescription, Collectors.counting()));
+
+                System.out.println(user.getFullname() + ":");
+                if (dutyCount.isEmpty()) {
+                    System.out.println("   (Немає нарядів)");
+                } else {
+                    dutyCount.forEach((desc, count) -> System.out.println("  *" + desc + ": " + count));
+                }
+            }
+        }
+    }
+
+
+
+
+    public void manualDistribution(Scanner scanner) {
+        System.out.println("Введіть рік: ");
+        int year = scanner.nextInt();
+        System.out.println("Введіть місяць: ");
+        int month = scanner.nextInt();
+        System.out.println("Введіть кількість нарядів на столову: ");
+        int tableDutyCount = scanner.nextInt();
+        System.out.println("Введіть кількість нарядів на курс: ");
+        int courseDutyCount = scanner.nextInt();
+
+        Map<String, Integer> dutiesMonth = Map.of(
+                "Наряд на столову", tableDutyCount,
+                "Наряд на курс", courseDutyCount
+        );
+
+        autoDistribution(year, month, dutiesMonth);
+
+    }
 
 }
