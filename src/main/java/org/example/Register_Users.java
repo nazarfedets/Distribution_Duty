@@ -27,8 +27,7 @@ public class Register_Users implements UserManagerInterface, ControlDuty {
             users.add(cadet);
         }
 
-        availableDuties.add(new Duty("Наряд на столову", 5));
-        availableDuties.add(new Duty("Наряд на курс", 7));
+        
     }
 
     @Override

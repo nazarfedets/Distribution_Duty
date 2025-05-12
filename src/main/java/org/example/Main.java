@@ -1,5 +1,6 @@
 package org.example;
 
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
@@ -92,8 +93,8 @@ public class Main {
 
             int actionselection = scanner.nextInt();
             scanner.nextLine();
-            if (actionselection == 1) {
 
+            if (actionselection == 1) {
                 System.out.println("Виберіть наряд для призначення:");
                 System.out.println("1. Наряд на столову");
                 System.out.println("2. Наряд на курс");
@@ -101,10 +102,14 @@ public class Main {
                 int dutyselection = scanner.nextInt();
                 scanner.nextLine();
 
+                System.out.println("Введіть дату призначення наряду (у форматі рррр-мм-дд): ");
+                String datesr = scanner.nextLine();
+                LocalDate date = LocalDate.parse(datesr);
+
                 Duty duty = null;
                 switch (dutyselection) {
-                    case 1 -> duty = new Duty("Наряд на столову", 1);
-                    case 2 -> duty = new Duty("Наряд на курс", 1);
+                    case 1 -> duty = new Duty("Наряд на столову", 1, date);
+                    case 2 -> duty = new Duty("Наряд на курс", 1, date);
                     default -> System.out.println("Невірний вибір");
                 }
 
@@ -113,7 +118,6 @@ public class Main {
                     System.out.println("Наряд успішно призначено " + user.getFullname());
                 }
             } else if (actionselection == 2) {
-
                 System.out.println("Виберіть наряд для видалення:");
                 for (int i = 0; i < user.getDuties().size(); i++) {
                     Duty d = user.getDuties().get(i);
